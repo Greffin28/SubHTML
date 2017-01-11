@@ -8,19 +8,19 @@ std::string tDIR = "temp";
 std::vector<std::string> files;
 
 
-void processFile(std::string destPath, std::string filePath) {
+void processFile(std::string destPath, std::string filePath, std::string postfix = "") {
 	std::ifstream is, is2;
 	std::ofstream os;
 	is.open(filePath.c_str());
 	if (is.is_open()) {
-		os.open((destPath + '/' + filePath).c_str());
+		os.open((destPath + '/' + filePath + postfix).c_str());
 
 		std::string line;
 		while (getline(is, line)) {
 			if (line.length() > 2 && line.at(0) == '[' && line.at(line.length() - 1) == ']') {
 				line = line.substr(1, line.length() - 2);
-				processFile(tDIR, line);
-				is2.open((tDIR + '/' + line).c_str());
+				processFile(tDIR, line, ".temp");
+				is2.open((tDIR + '/' + line + ".temp").c_str());
 				if (is2.is_open()) {
 					while (getline(is2, line)) {
 						os << line << std::endl;
@@ -47,7 +47,9 @@ int main(int argc, const char * args[]) {
 	for (int i = 1; i < argc; ++i) {
 		if (!strcmp(args[i], "-fDIR")) {
 			fDIR = args[++i];
-		} else {
+		} else if (!strcmp(args[i], "-tDIR")) {
+			tDIR = args[++i];
+		}else {
 			files.push_back(args[i]);
 		}
 	}
