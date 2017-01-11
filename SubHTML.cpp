@@ -17,7 +17,7 @@ void processFile(std::string destPath, std::string filePath) {
 
 		std::string line;
 		while (getline(is, line)) {
-			if (line.at(0) == '[' && line.at(line.length() - 1) == ']') {
+			if (line.length() > 2 && line.at(0) == '[' && line.at(line.length() - 1) == ']') {
 				line = line.substr(1, line.length() - 2);
 				processFile(tDIR, line);
 				is2.open((tDIR + '/' + line).c_str());
