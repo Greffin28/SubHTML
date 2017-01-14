@@ -34,7 +34,7 @@ void processFile(std::string destPath, std::string filePath, std::string postfix
 			}
 			os.close();
 		} else {
-			std::cout << "File path doesn't exist: " << (destPath + '/' + filePath + postfix);
+			std::cout << "File path doesn't exist: " << (destPath + '/' + filePath + postfix) << std::endl;
 		}
 		is.close();
 	} else {
