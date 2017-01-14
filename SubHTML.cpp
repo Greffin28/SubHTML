@@ -7,35 +7,36 @@
 std::string tDIR = "temp";
 std::vector<std::string> files;
 
-
 void processFile(std::string destPath, std::string filePath, std::string postfix = "") {
 	std::ifstream is, is2;
 	std::ofstream os;
 	is.open(filePath.c_str());
 	if (is.is_open()) {
 		os.open((destPath + '/' + filePath + postfix).c_str());
-
-		std::string line;
-		while (getline(is, line)) {
-			if (line.length() > 2 && line.at(0) == '[' && line.at(line.length() - 1) == ']') {
-				line = line.substr(1, line.length() - 2);
-				processFile(tDIR, line, ".temp");
-				is2.open((tDIR + '/' + line + ".temp").c_str());
-				if (is2.is_open()) {
-					while (getline(is2, line)) {
-						os << line << std::endl;
+		if (os.is_open()) {
+			std::string line;
+			while (getline(is, line)) {
+				if (line.length() > 2 && line.at(0) == '[' && line.at(line.length() - 1) == ']') {
+					line = line.substr(1, line.length() - 2);
+					processFile(tDIR, line, ".temp");
+					is2.open((tDIR + '/' + line + ".temp").c_str());
+					if (is2.is_open()) {
+						while (getline(is2, line)) {
+								os << line << std::endl;
+						}
+						is2.close();
+					} else {
+							std::cout << "Error on opening file: " << (tDIR + '/' + line + ".temp") << std::endl;
 					}
-					is2.close();
 				} else {
-					std::cout << "Error on opening file: " << line << std::endl;
+					os << line << std::endl;
 				}
-			} else {
-				os << line << std::endl;
 			}
+			os.close();
+		} else {
+			std::cout << "File path doesn't exist: " << (destPath + '/' + filePath + postfix);
 		}
-
 		is.close();
-		os.close();
 	} else {
 		std::cout << "Error on opening file: " << filePath << std::endl;
 	}
