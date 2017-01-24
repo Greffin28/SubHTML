@@ -4,29 +4,59 @@
 #include <vector>
 #include <fstream>
 
-std::string tDIR = "temp";
 std::vector<std::string> files;
 
-void processFile(std::string destPath, std::string filePath, std::string postfix = "") {
+std::string folderPath(std::string &filePath) {
+	int foundAt = filePath.rfind('/');
+	if (foundAt >= filePath.length()) return "";
+	else return filePath.substr(0, foundAt);
+}
+
+std::string fileNameE(std::string &filePath) {
+	int folderLength = folderPath(filePath).length();
+	if (folderLength > 0) return filePath.substr(folderLength + 1, filePath.length() - folderLength - 1);
+	else return filePath;
+}
+
+std::string fileNameNE(std::string &filePath) {
+	int folderLength = folderPath(filePath).length();
+	if (folderLength > 0) return filePath.substr(folderLength + 1, filePath.rfind('.') - folderLength - 1);
+	else return filePath.substr(0, filePath.rfind('.'));
+}
+
+void fixFolderFileName(std::string &folder, std::string &fileName) {
+	if (folderPath(fileName).length() > 0) {
+		folder += '/' + folderPath(fileName);
+		fileName = fileNameE(fileName);
+	}
+}
+
+void processFile(std::string folder, std::string fileName, std::string postfix) {
 	std::ifstream is, is2;
 	std::ofstream os;
-	is.open(filePath.c_str());
+
+	fixFolderFileName(folder, fileName);
+
+	is.open((folder + '/' + fileName).c_str());
 	if (is.is_open()) {
-		os.open((destPath + '/' + filePath + postfix).c_str());
+		os.open((folder + '/' + fileNameNE(fileName) + postfix).c_str());
 		if (os.is_open()) {
 			std::string line;
 			while (getline(is, line)) {
 				if (line.length() > 2 && line.at(0) == '[' && line.at(line.length() - 1) == ']') {
 					line = line.substr(1, line.length() - 2);
-					processFile(tDIR, line, ".temp");
-					is2.open((tDIR + '/' + line + ".temp").c_str());
+
+					fixFolderFileName(folder, line);
+
+					processFile(folder, line, ".temp");
+					is2.open((folder + '/' + fileNameNE(line) + ".temp").c_str());
 					if (is2.is_open()) {
 						while (getline(is2, line)) {
 								os << line << std::endl;
 						}
 						is2.close();
 					} else {
-							std::cout << "Error on opening file: " << (tDIR + '/' + line + ".temp") << std::endl;
+							std::cout << "Error on opening file: " << folder + '/' + fileNameNE(line) + ".temp" << std::endl;
 					}
 				} else {
 					os << line << std::endl;
@@ -34,34 +64,31 @@ void processFile(std::string destPath, std::string filePath, std::string postfix
 			}
 			os.close();
 		} else {
-			std::cout << "File path doesn't exist: " << (destPath + '/' + filePath + postfix) << std::endl;
+			std::cout << "File path doesn't exist: " << folder + '/' + fileName + postfix << std::endl;
 		}
 		is.close();
 	} else {
-		std::cout << "Error on opening file: " << filePath << std::endl;
+		std::cout << "Error on opening file: " << folder + '/' + fileName << std::endl;
 	}
 }
 
-int main(int argc, const char * args[]) {
-	std::string fDIR = ".Empty fDIR.";
-	
-	for (int i = 1; i < argc; ++i) {
-		if (!strcmp(args[i], "-fDIR")) {
-			fDIR = args[++i];
-		} else if (!strcmp(args[i], "-tDIR")) {
-			tDIR = args[++i];
-		}else {
-			files.push_back(args[i]);
+int main() {
+	std::ifstream fileList("subhtml.txt");
+
+	if (fileList.is_open()) {
+		std::string line;
+		while (getline(fileList, line)) {
+			files.push_back(line);
 		}
-	}
-	
-	if (fDIR != ".Empty fDIR.") {
+
 		for (int i = 0; i < files.size(); ++i) {
-			processFile(fDIR, files.at(i));
+			processFile(folderPath(files.at(i)), fileNameE(files.at(i)), ".html");
 		}
+		
+		fileList.close();
 	} else {
-		std::cout << "Please specify the final directory with \"-fDIR\"" << std:: endl;
-	}
+		std::cout << "No subhtml.txt file exist!" << std::endl;
+	}	
 
 	return 0;
 }
