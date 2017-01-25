@@ -26,7 +26,10 @@ std::string fileNameNE(std::string &filePath) {
 
 void fixFolderFileName(std::string &folder, std::string &fileName) {
 	if (folderPath(fileName).length() > 0) {
-		folder += '/' + folderPath(fileName);
+		std::string separator = "";
+		if (folder.length() > 0) separator = "/";
+
+		folder += separator + folderPath(fileName);
 		fileName = fileNameE(fileName);
 	}
 }
@@ -37,26 +40,34 @@ void processFile(std::string folder, std::string fileName, std::string postfix) 
 
 	fixFolderFileName(folder, fileName);
 
-	is.open((folder + '/' + fileName).c_str());
+	std::string separator = "";
+	if (folder.length() > 0) separator = "/";
+
+	is.open((folder + separator + fileName).c_str());
 	if (is.is_open()) {
-		os.open((folder + '/' + fileNameNE(fileName) + postfix).c_str());
+		os.open((folder + separator + fileNameNE(fileName) + postfix).c_str());
 		if (os.is_open()) {
 			std::string line;
 			while (getline(is, line)) {
 				if (line.length() > 2 && line.at(0) == '[' && line.at(line.length() - 1) == ']') {
 					line = line.substr(1, line.length() - 2);
 
-					fixFolderFileName(folder, line);
+					std::string relativeFolder = folder;
 
-					processFile(folder, line, ".temp");
-					is2.open((folder + '/' + fileNameNE(line) + ".temp").c_str());
+					fixFolderFileName(relativeFolder, line);
+
+					std::string separator = "";
+					if (relativeFolder.length() > 0) separator = "/";
+
+					processFile(relativeFolder, line, ".temp");
+					is2.open((relativeFolder + separator + fileNameNE(line) + ".temp").c_str());
 					if (is2.is_open()) {
 						while (getline(is2, line)) {
 								os << line << std::endl;
 						}
 						is2.close();
 					} else {
-							std::cout << "Error on opening file: " << folder + '/' + fileNameNE(line) + ".temp" << std::endl;
+							std::cout << "Error on opening file: " << relativeFolder + separator + fileNameNE(line) + ".temp" << std::endl;
 					}
 				} else {
 					os << line << std::endl;
@@ -64,11 +75,11 @@ void processFile(std::string folder, std::string fileName, std::string postfix) 
 			}
 			os.close();
 		} else {
-			std::cout << "File path doesn't exist: " << folder + '/' + fileName + postfix << std::endl;
+			std::cout << "File path doesn't exist: " << folder + separator + fileName + postfix << std::endl;
 		}
 		is.close();
 	} else {
-		std::cout << "Error on opening file: " << folder + '/' + fileName << std::endl;
+		std::cout << "Error on opening file: " << folder + separator + fileName << std::endl;
 	}
 }
 
