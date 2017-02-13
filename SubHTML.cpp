@@ -89,7 +89,7 @@ int main() {
 	if (fileList.is_open()) {
 		std::string line;
 		while (getline(fileList, line)) {
-			files.push_back(line);
+			if (line != "" && line.at(0) != '#') files.push_back(line);
 		}
 
 		for (int i = 0; i < files.size(); ++i) {
