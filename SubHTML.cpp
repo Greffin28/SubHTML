@@ -5,6 +5,7 @@
 #include <fstream>
 
 std::vector<std::string> files;
+std::string inFolder = "";
 
 std::string folderPath(std::string &filePath) {
 	int foundAt = filePath.rfind('/');
@@ -89,7 +90,13 @@ int main() {
 	if (fileList.is_open()) {
 		std::string line;
 		while (getline(fileList, line)) {
-			if (line != "" && line.at(0) != '#') files.push_back(line);
+			if (line == "" || line.at(0) == '#') {
+				// Do Nothing
+			} else if (line != "" && line.at(0) == '>') {
+				inFolder = line.substr(1, line.length() - 1);
+			} else {
+				files.push_back(inFolder + line);
+			}
 		}
 
 		for (int i = 0; i < files.size(); ++i) {
